@@ -12,6 +12,23 @@ from .errors import GatewayError, rpc_error
 MAX_BODY = 64 * 1024
 
 
+class DuplicateField(ValueError):
+    """The proxy and downstream must not disagree about which value wins."""
+
+
+def unique_fields(pairs: list[tuple[str, object]]) -> dict[str, object]:
+    result = {}
+    for key, value in pairs:
+        if key in result:
+            raise DuplicateField
+        result[key] = value
+    return result
+
+
+def reject_constant(value: str):
+    raise ValueError("Non-JSON numeric constant")
+
+
 async def proxy(request: Request, client: httpx.AsyncClient, settings: Settings) -> Response:
     raw = bytearray()
     async for chunk in request.stream():
@@ -19,7 +36,9 @@ async def proxy(request: Request, client: httpx.AsyncClient, settings: Settings)
         if len(raw) > MAX_BODY:
             return rpc_error(None, -32600, "Request too large", 413)
     try:
-        payload = json.loads(raw)
+        payload = json.loads(raw, object_pairs_hook=unique_fields, parse_constant=reject_constant)
+    except DuplicateField:
+        return rpc_error(None, -32600, "Duplicate JSON field", 400)
     except (ValueError, UnicodeDecodeError):
         return rpc_error(None, -32700, "Parse error", 400)
     if not isinstance(payload, dict):

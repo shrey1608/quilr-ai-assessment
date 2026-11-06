@@ -94,7 +94,7 @@ A valid but missing customer returns a tool execution error. Unexpected executio
 
 ### Authorization
 
-The gateway verifies the JWT signature, issuer, audience, expiry, subject, and role. It forwards `tools/list` unchanged and checks `admin_` permissions on `tools/call` before contacting the downstream server. Denials preserve the request ID. Client bearer tokens are not forwarded downstream.
+The gateway verifies the JWT signature, issuer, audience, expiry, subject, and role. It forwards `tools/list` unchanged and checks `admin_` permissions on `tools/call` before contacting the downstream server. Denials preserve the request ID. Client bearer tokens are not forwarded downstream. Duplicate JSON keys are rejected so the proxy and downstream cannot disagree about the tool being called; nonstandard JSON constants such as NaN are also rejected.
 
 The signed subject identifies the tenant for rate limiting, so rotating a token does not reset its budget. This is a POST JSON-RPC proxy to a mock; full MCP Streamable HTTP sessions, GET event channels, SSE relay, and batch requests are outside its scope. Tool calls without IDs are not executed.
 
@@ -124,7 +124,7 @@ uv run ruff format --check .
 uv run pytest -q
 ```
 
-The 61 tests cover stdio output, malformed requests, authorization, every two-chunk split of sample PII, randomized chunking, SSE framing, SQLite concurrency and restart persistence, timeouts, and stream cleanup. GitHub Actions runs the tests and demo on Python 3.11, 3.12, and 3.13.
+The 64 tests cover stdio output, malformed requests, authorization, every two-chunk split of sample PII, randomized chunking, SSE framing, SQLite concurrency and restart persistence, timeouts, and stream cleanup. GitHub Actions runs the tests and demo on Python 3.11, 3.12, and 3.13.
 
 Live providers have not been tested. Configure their full completion URLs, model names, and API keys in `.env`; the adapter expects chat-completion JSON and SSE ending in `[DONE]`. The mocks should remain on localhost. A deployment needs TLS, private upstream connectivity, and an external identity issuer. Keep SQLite on persistent local storage; a multi-host deployment needs a shared quota service.
 

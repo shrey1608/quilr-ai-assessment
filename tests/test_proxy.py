@@ -91,6 +91,21 @@ async def test_list_transparent_and_invalid_auth(settings):
     "body,code",
     [
         (b"{", -32700),
+        (
+            b'{"jsonrpc":"2.0","id":1,"method":"tools/call",'
+            b'"params":{"name":"admin_reset_key","name":"get_status"}}',
+            -32600,
+        ),
+        (
+            b'{"jsonrpc":"2.0","id":1,"method":"tools/call","method":"tools/list",'
+            b'"params":{"name":"admin_reset_key"}}',
+            -32600,
+        ),
+        (
+            b'{"jsonrpc":"2.0","id":1,"method":"tools/call",'
+            b'"params":{"name":"get_status","arguments":{"amount":NaN}}}',
+            -32700,
+        ),
         (b"[]", -32600),
         (b"null", -32600),
         (b'{"jsonrpc":"1.0","method":"tools/list","id":1}', -32600),
