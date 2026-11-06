@@ -1,4 +1,4 @@
-"""Task 4: durable, transactionally reserved sliding-window token budget."""
+"""SQLite token reservations for a per-tenant sliding window."""
 
 import asyncio
 import math
@@ -30,7 +30,7 @@ class TokenLimiter:
         if tokens <= 0 or tokens > self.limit:
             raise GatewayError(429, "token_limit_exceeded", "Request exceeds token budget", 60)
         async with aiosqlite.connect(self.path, timeout=5) as db:
-            # Database lock, not a Python lock: works across gateway workers/processes.
+            # Serialize admission across processes sharing this database.
             await db.execute("BEGIN IMMEDIATE")
             now = self.clock()
             await db.execute(

@@ -1,4 +1,4 @@
-"""Provider integration with bounded responses, SSE framing, and explicit deadlines."""
+"""Chat-completion requests, SSE parsing, and primary/backup routing."""
 
 import asyncio
 import json
@@ -67,7 +67,7 @@ async def sse_events(response: httpx.Response) -> AsyncIterator[dict | None]:
                 size = 0
             elif decoded.startswith("data:"):
                 data.append(decoded[5:].removeprefix(" "))
-    # EOF without [DONE] is an interrupted response, never a successful completion.
+    # Require [DONE] so a dropped connection cannot look like a complete response.
     raise ValueError("Incomplete SSE stream")
 
 
@@ -111,7 +111,7 @@ class ProviderRouter:
         for index, endpoint in enumerate(self.endpoints):
             response = None
             try:
-                # Absolute deadline includes headers AND body; no orphaned timeout race task.
+                # Include body reads in the deadline, even if headers arrive promptly.
                 async with asyncio.timeout(self.timeout):
                     response = await self.client.send(
                         self._request(endpoint, body, False), stream=True
@@ -137,7 +137,7 @@ class ProviderRouter:
                         or not payload["choices"]
                     ):
                         raise ValueError("Invalid provider response")
-                    # Return only the contract's safe fields, never arbitrary upstream metadata.
+                    # Forward only fields supported by the gateway response contract.
                     content = payload["choices"][0]["message"]["content"]
                     if not isinstance(content, str):
                         raise ValueError("Invalid provider content")

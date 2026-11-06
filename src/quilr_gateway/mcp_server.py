@@ -1,4 +1,4 @@
-"""Task 1: official SDK transport/session, strict Pydantic tool arguments."""
+"""Customer lookup and simulated refunds over MCP stdio."""
 
 import asyncio
 import json

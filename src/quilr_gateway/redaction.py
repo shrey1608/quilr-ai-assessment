@@ -1,8 +1,8 @@
-"""Task 3: bounded lexical lookahead, independent of provider chunk boundaries.
+"""Redact PII that may span several provider chunks.
 
 Hold an unfinished word, or a numeric run containing spaces/hyphens. This prevents
 releasing an email local part or the beginning of a card number too early.
-Oversized candidates fail closed: emit one marker and discard to a boundary.
+Discard oversized candidates through the next boundary after emitting a marker.
 """
 
 import re

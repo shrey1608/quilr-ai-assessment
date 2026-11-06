@@ -1,1 +1,1 @@
-"""Runnable solutions for the four QuilrAI assessment tasks."""
+"""MCP tools and HTTP gateways for the QuilrAI assessment."""

@@ -1,4 +1,4 @@
-"""Signed, expiring JWTs; roles are never trusted from unverified payloads."""
+"""Bearer-token verification and local demo token issuance."""
 
 import argparse
 import time

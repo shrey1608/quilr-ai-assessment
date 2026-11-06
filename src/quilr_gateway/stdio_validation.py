@@ -1,7 +1,7 @@
-"""Wire preflight for SDK 1.x, which otherwise logs malformed JSON as a notification.
+"""Reject malformed messages before they reach the SDK session.
 
-The SDK still owns stdio framing, initialization, dispatch and cancellation.
-This adapter supplies standard JSON-RPC errors before invalid messages reach it.
+SDK 1.x logs malformed JSON as a notification; this adapter returns the
+JSON-RPC parse error instead. Initialization and dispatch stay with the SDK.
 """
 
 import asyncio

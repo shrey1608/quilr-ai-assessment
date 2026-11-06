@@ -1,4 +1,4 @@
-"""Task 2: scoped POST HTTP/JSON-RPC proxy (not a full MCP SSE/session gateway)."""
+"""Role checks for tool calls before forwarding JSON-RPC requests."""
 
 import json
 
@@ -40,7 +40,7 @@ async def proxy(request: Request, client: httpx.AsyncClient, settings: Settings)
         return rpc_error(request_id, -32602, "Invalid params")
     method = payload["method"]
     notification = "id" not in payload
-    # Tool invocations must have request IDs in MCP. Never execute them as notifications.
+    # MCP tool calls require an ID; do not execute notification-shaped calls.
     if notification and method in ("tools/call", "tools/list"):
         return Response(status_code=202)
     if method == "tools/call":
